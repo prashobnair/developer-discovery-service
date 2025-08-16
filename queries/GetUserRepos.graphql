@@ -1,0 +1,40 @@
+# queries/GetUserRepos.graphql
+query($username: String!, $pageSize: Int!, $after: String) {
+  user(login: $username) {
+    repositories(first: $pageSize, after: $after, privacy: PUBLIC, orderBy: {field: PUSHED_AT, direction: DESC}, isFork: false) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      nodes {
+        nameWithOwner
+        description
+        stargazerCount
+        forkCount
+        pushedAt
+        repositoryTopics(first: 10) {
+          nodes {
+            topic {
+              name
+            }
+          }
+        }
+        readme_md: object(expression: "HEAD:README.md") {
+          ... on Blob {
+            text
+          }
+        }
+        readme_rst: object(expression: "HEAD:README.rst") {
+          ... on Blob {
+            text
+          }
+        }
+        readme: object(expression: "HEAD:README") {
+          ... on Blob {
+            text
+          }
+        }
+      }
+    }
+  }
+}

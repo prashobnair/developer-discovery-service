@@ -1,0 +1,17 @@
+# .gitignore
+# Python
+__pycache__/
+*.pyc
+
+# Environment
+.env
+venv/
+*.env
+
+# IDEs
+.vscode/
+.idea/
+
+# Outputs
+state/
+diffs/

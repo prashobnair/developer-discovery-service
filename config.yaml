@@ -1,0 +1,81 @@
+# config.yaml
+# This section controls the main data sync pipeline
+sync_config:
+  # The sync pipeline will automatically use a combined set of all primary keywords
+  # from all clients defined below for discovery.
+  repository_search:
+    
+    # Partitions for breaking up large searches to get more than 1000 results
+    star_partitions:
+      - "10..50"
+      - "51..100"
+      - "101..200"
+      - "201..1000"
+      - ">1000"
+    min_forks: 2
+  
+  # The sync pipeline will filter all discovered developers against this master list of locations
+  target_locations:
+    - "bengaluru"
+    - "bangalore"
+
+# This section defines each client and their specific keyword requirements
+clients:
+  # Client A is looking for AI/LLM engineers
+  client_a_ai_eng:
+    primary_keywords:
+      - "langchain"
+      - "llamaindex"
+      - "huggingface"
+      - "pytorch"
+      - "agent"
+      - "rag"
+      - "retrieval-augmentation"
+      - "semantic-search"
+      - "vector-database"
+    relevance_keywords:
+      # This list should contain all primary_keywords plus broader concepts
+      frameworks_libraries: ["langchain", "llamaindex", "huggingface", "pytorch"]
+      tools_databases: ["vector-database"]
+      platforms_cloud: ["sagemaker", "aws", "docker"]
+      languages: ["python"]
+      concepts: ["agent", "rag", "retrieval-augmentation", "llm", "nlp", "semantic-search", "vector-database", "machine learning"]
+  
+  # Client B is looking for DevOps/Infra engineers
+  #client_b_devops:
+  #  primary_keywords:
+  #    - "terraform"
+  #    - "ansible"
+  #    - "kubernetes"
+  #    - "prometheus"
+  #    - "argocd"
+  #  relevance_keywords:
+  #    frameworks_libraries: ["argocd"]
+  #    tools_databases: ["terraform", "ansible", "kubernetes", "prometheus", "docker", "git"]
+  #    platforms_cloud: ["aws", "gcp", "azure"]
+  #    languages: ["go", "python", "bash"]
+  #    concepts: ["ci-cd", "gitops", "iac", "infrastructure-as-code", "monitoring"]
+
+# Global settings used by all parts of the pipeline
+global_settings:
+  github:
+    graphql_page_size: 100
+    max_readme_bytes: 200000
+    token_switch_threshold: 120
+    token_low_threshold: 10
+    diff_fetch_retry: 3
+    diff_fetch_backoff: 2.0
+    graphql_url: "https://api.github.com/graphql"
+  pipeline:
+    max_pr_age_days: 270 #9 months
+    max_repos_per_user: 1000
+    max_pr_results_per_user: 1000
+    diff_fetch_workers: 8
+  enrichment_strategy:
+    fetch_topics: true
+    fetch_description: true
+    fetch_readme_bytes: 200000 # Set to 0 to disable.
+  outputs:
+    state_dir: "state"
+    db_name: "pipeline.db"
+    diffs_dir: "diffs"

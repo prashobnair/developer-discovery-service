@@ -1,0 +1,8 @@
+# requirements.txt
+requests
+PyGithub
+pandas
+pyyaml
+python-dotenv
+tqdm
+numpy

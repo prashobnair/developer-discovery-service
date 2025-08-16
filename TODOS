@@ -1,0 +1,5 @@
+1. Update the users table to have stage be defaulted to -1
+2. Update current users with stage -1
+3. manually check the repos of the devs and decide if they are relevant for our current run
+    if relevant, update stage to 0
+
