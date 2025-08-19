@@ -15,3 +15,7 @@ venv/
 # Outputs
 state/
 diffs/
+
+# SSH keys
+my-laptop-linode
+my-laptop-linode.pub

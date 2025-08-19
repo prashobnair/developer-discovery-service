@@ -24,6 +24,9 @@ class Persistence:
                 login TEXT PRIMARY KEY, location TEXT, html_url TEXT,
                 stage INTEGER DEFAULT -1, discovered_at TEXT,
                 email TEXT, linkedin_url TEXT,
+                years_of_experience REAL,
+                current_company TEXT,
+                experience_summary TEXT,
                 expertise_score REAL, impact_score REAL, activity_score REAL,
                 final_score REAL, tier TEXT
             )""")
@@ -243,5 +246,62 @@ class Persistence:
             self.conn.executemany(
                 "INSERT INTO client_scores (client_name, login, final_score, tier, generated_at) VALUES (?, ?, ?, ?, ?)",
                 insert_data
+            )
+            self.conn.commit()
+    
+    def get_users_without_linkedin(self) -> List[Dict[str, str]]:
+        """
+        Fetches all processed users who do not have a LinkedIn URL,
+        returning their login and GitHub profile URL.
+        """
+        with self._lock:
+            c = self.conn.cursor()
+            c.execute("""
+                SELECT login, html_url
+                FROM users
+                WHERE stage = -1 AND (linkedin_url IS NULL OR linkedin_url = '')
+            """)
+            return [{"login": row[0], "html_url": row[1]} for row in c.fetchall()]
+
+    def update_user_linkedin(self, login: str, linkedin_url: str):
+        """Updates the linkedin_url for a single user."""
+        with self._lock:
+            self.conn.execute(
+                "UPDATE users SET linkedin_url = ? WHERE login = ?",
+                (linkedin_url, login)
+            )
+            self.conn.commit()
+    
+    def get_users_with_linkedin_unscraped(self) -> List[Dict[str, str]]:
+        """
+        Fetches users who have a LinkedIn URL but have not yet been
+        scraped for experience data.
+        """
+        with self._lock:
+            c = self.conn.cursor()
+            # Select users who have a linkedin_url but years_of_experience is null
+            c.execute("""
+                SELECT login, linkedin_url
+                FROM users
+                WHERE (linkedin_url IS NOT NULL AND linkedin_url != '')
+                  AND (years_of_experience IS NULL) limit 2
+            """)
+            return [{"login": row[0], "linkedin_url": row[1]} for row in c.fetchall()]
+
+    def update_user_experience(self, login: str, experience_data: Dict):
+        """Updates a user record with the scraped experience data."""
+        with self._lock:
+            self.conn.execute(
+                """UPDATE users SET
+                   years_of_experience = ?,
+                   current_company = ?,
+                   experience_summary = ?
+                   WHERE login = ?""",
+                (
+                    experience_data['years_of_experience'],
+                    experience_data['current_company'],
+                    experience_data['experience_summary'],
+                    login
+                )
             )
             self.conn.commit()

@@ -1,3 +1,4 @@
+# queries/GetRepoDetails.graphql
 query GetRepoDetails($owner: String!, $name: String!) {
   repository(owner: $owner, name: $name) {
     nameWithOwner
